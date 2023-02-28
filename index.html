@@ -176,5 +176,40 @@
         <!-- mais linhas de dados aqui -->
       </tbody>
     </table>
+
+    <script src="script.js">
+      // Adiciona um evento de clique em cada célula da tabela
+      let cells = document.querySelectorAll("#tabela-simulados td");
+      cells.forEach((cell) => {
+        cell.addEventListener("click", function () {
+          let currentPercentage = parseInt(cell.innerHTML);
+          if (!isNaN(currentPercentage)) {
+            let newPercentage = prompt("Insira a nova porcentagem:");
+            if (newPercentage !== null && newPercentage !== "") {
+              cell.innerHTML = newPercentage + "%";
+              recalcularMedia();
+            }
+          }
+        });
+      });
+
+      // Recalcula a média de cada linha da tabela
+      function recalcularMedia() {
+        let table = document.querySelector("#tabela-simulados");
+        let rows = table.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+          let cells = row.querySelectorAll("td:not(:last-child)");
+          let totalPercentage = 0;
+          cells.forEach((cell) => {
+            let percentage = parseInt(cell.innerHTML);
+            if (!isNaN(percentage)) {
+              totalPercentage += percentage;
+            }
+          });
+          let media = totalPercentage / cells.length;
+          row.lastElementChild.innerHTML = media.toFixed(2) + "%";
+        });
+      }
+    </script>
   </body>
 </html>
