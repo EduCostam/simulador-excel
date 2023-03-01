@@ -85,3 +85,61 @@ rows.forEach((row, index) => {
     });
   }
 });
+
+const express = require('express');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const app = express();
+
+// Dados da tabela
+let dados = [
+  { dia: '01/03/2023', acertos: 0, erros: 0, porcentagem: 0 },
+  { dia: '02/03/2023', acertos: 0, erros: 0, porcentagem: 0 },
+  { dia: '03/03/2023', acertos: 0, erros: 0, porcentagem: 0 },
+  { dia: '04/03/2023', acertos: 0, erros: 0, porcentagem: 0 },
+  { dia: '05/03/2023', acertos: 0, erros: 0, porcentagem: 0 },
+];
+
+// Rota para consultar o resultado de um simulado a partir de um link
+app.get('/simulado', async (req, res) => {
+  try {
+    const { link } = req.query;
+
+    // Faz a requisição para o link do simulado
+    const response = await axios.get(link);
+
+    // Carrega o HTML da página em um objeto Cheerio
+    const $ = cheerio.load(response.data);
+
+    // Encontra os elementos HTML que contêm a quantidade de acertos e erros
+    const acertos = $('span[class="acertos"]').text();
+    const erros = $('span[class="erros"]').text();
+
+    // Calcula a porcentagem de acertos
+    const total = parseInt(acertos) + parseInt(erros);
+    const porcentagem = (parseInt(acertos) / total) * 100;
+
+    // Encontra o dia atual e atualiza os dados na tabela
+    const dataAtual = new Date().toLocaleDateString();
+    const indice = dados.findIndex((item) => item.dia === dataAtual);
+    dados[indice].acertos = acertos;
+    dados[indice].erros = erros;
+    dados[indice].porcentagem = porcentagem.toFixed(2);
+
+    // Retorna os dados atualizados
+    res.status(200).json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao consultar o resultado do simulado.');
+  }
+});
+
+// Inicia o servidor
+app.listen(3000, () => {
+  console.log('Servidor iniciado na porta 3000.');
+});
+
+const simuladoLink = document.getElementById("simulado-link").value;
+getSimuladoData(simuladoLink);
+
+
